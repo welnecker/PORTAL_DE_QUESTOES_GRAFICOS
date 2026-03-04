@@ -38,6 +38,47 @@ with col4:
     ymax = st.number_input("y máximo", value=5.0)
 
 
+# ---------------------------------------------------
+# PAINEL DE ESTILO
+# ---------------------------------------------------
+
+st.markdown("### Estilo do gráfico")
+
+c1, c2 = st.columns(2)
+
+with c1:
+    cor_funcao = st.color_picker("Cor da função", "#1f77b4")
+    espessura_funcao = st.slider("Espessura da função", 1.0, 5.0, 2.0)
+
+with c2:
+    estilo_linha = st.selectbox(
+        "Estilo da linha",
+        ["Sólida", "Tracejada", "Pontilhada"]
+    )
+
+    cor_grade = st.color_picker("Cor da grade", "#b0b0b0")
+
+mapa_estilo = {
+    "Sólida": "-",
+    "Tracejada": "--",
+    "Pontilhada": ":"
+}
+
+st.markdown("### Estilo dos eixos")
+
+c3, c4 = st.columns(2)
+
+with c3:
+    cor_eixos = st.color_picker("Cor dos eixos", "#000000")
+
+with c4:
+    espessura_eixos = st.slider("Espessura dos eixos", 0.5, 3.0, 1.2)
+
+
+# ---------------------------------------------------
+# FUNÇÃO PARA INTERVALOS
+# ---------------------------------------------------
+
 def converter_condicao(cond):
 
     cond = cond.replace(" ", "")
@@ -54,6 +95,10 @@ def converter_condicao(cond):
 
     return cond
 
+
+# ---------------------------------------------------
+# GERAR GRÁFICO
+# ---------------------------------------------------
 
 if st.button("Gerar gráfico"):
 
@@ -74,8 +119,9 @@ if st.button("Gerar gráfico"):
                 expr = sympify(linha.strip())
                 f = lambdify(x, expr, "numpy")
                 ys = f(xs)
-            
+
                 break
+
             expr_str, cond_str = linha.split(":")
 
             expr = sympify(expr_str.strip())
@@ -91,13 +137,19 @@ if st.button("Gerar gráfico"):
         fig, ax = plt.subplots(figsize=(5,4))
 
         # gráfico da função
-        ax.plot(xs, ys, color="blue", linewidth=2)
+        ax.plot(
+            xs,
+            ys,
+            color=cor_funcao,
+            linewidth=espessura_funcao,
+            linestyle=mapa_estilo[estilo_linha]
+        )
 
         # limites
         ax.set_xlim(xmin, xmax)
         ax.set_ylim(ymin, ymax)
 
-        # escala matemática perfeita
+        # escala matemática
         ax.set_aspect('equal', adjustable='box')
 
         # mover eixos para origem
@@ -108,22 +160,22 @@ if st.button("Gerar gráfico"):
         ax.spines['right'].set_color('none')
         ax.spines['top'].set_color('none')
 
-        # espessura dos eixos
-        ax.spines['left'].set_linewidth(1.2)
-        ax.spines['bottom'].set_linewidth(1.2)
+        # estilo dos eixos
+        ax.spines['left'].set_linewidth(espessura_eixos)
+        ax.spines['bottom'].set_linewidth(espessura_eixos)
+        ax.spines['left'].set_color(cor_eixos)
+        ax.spines['bottom'].set_color(cor_eixos)
 
         # marcações inteiras
         xticks = np.arange(xmin, xmax+1, 1)
         yticks = np.arange(ymin, ymax+1, 1)
 
-        # remover o 0 duplicado
         xticks = xticks[xticks != 0]
         yticks = yticks[yticks != 0]
 
         ax.set_xticks(xticks)
         ax.set_yticks(yticks)
 
-        # números menores
         ax.tick_params(
             axis='both',
             which='major',
@@ -133,31 +185,26 @@ if st.button("Gerar gráfico"):
             pad=2
         )
 
-        ax.tick_params(
-            axis='both',
-            which='minor',
-            length=2,
-            width=0.5
-        )
+        # grade
+        ax.grid(True, which='major', linestyle='-', linewidth=0.6, color=cor_grade, alpha=0.7)
 
-        # grade estilo livro
-        ax.grid(True, which='major', linestyle='-', linewidth=0.6, alpha=0.7)
-        # setas nos eixos
-        ax.plot((1), (0), ls="", marker=">", ms=6, color="black",
+        # setas
+        ax.plot((1), (0), ls="", marker=">", ms=6, color=cor_eixos,
                 transform=ax.get_yaxis_transform(), clip_on=False)
 
-        ax.plot((0), (1), ls="", marker="^", ms=6, color="black",
+        ax.plot((0), (1), ls="", marker="^", ms=6, color=cor_eixos,
                 transform=ax.get_xaxis_transform(), clip_on=False)
+
         ax.text(xmax, 0.2, "x", fontsize=9, ha="right")
         ax.text(0.2, ymax, "y", fontsize=9, va="top")
 
-        # centralizar gráfico
+        # centralizar
         colA, colB, colC = st.columns([1,2,1])
 
         with colB:
             st.pyplot(fig)
 
-        # exportar PNG
+        # exportar
         buffer = io.BytesIO()
 
         fig.savefig(buffer, format="png", dpi=300, bbox_inches="tight")
