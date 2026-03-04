@@ -70,8 +70,12 @@ if st.button("Gerar gráfico"):
         for linha in linhas:
 
             if ":" not in linha:
-                continue
 
+                expr = sympify(linha.strip())
+                f = lambdify(x, expr, "numpy")
+                ys = f(xs)
+            
+                break
             expr_str, cond_str = linha.split(":")
 
             expr = sympify(expr_str.strip())
