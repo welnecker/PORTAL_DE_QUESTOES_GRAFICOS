@@ -113,7 +113,21 @@ if st.button("Gerar gráfico"):
         ax.set_yticks(np.arange(ymin, ymax+1, 1))
         
         # reduzir tamanho dos índices
-        ax.tick_params(axis='both', labelsize=8)
+        ax.tick_params(
+            axis='both',
+            which='major',
+            labelsize=6,     # tamanho dos números
+            length=3,        # tamanho da marca do eixo
+            width=0.8,
+            pad=2            # distância do número até o eixo
+        )
+
+        ax.tick_params(
+            axis='both',
+            which='minor',
+            length=2,
+            width=0.5
+        )
         
         # grade estilo livro didático
         ax.minorticks_on()
