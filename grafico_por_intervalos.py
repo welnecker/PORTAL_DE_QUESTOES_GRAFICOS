@@ -1,7 +1,7 @@
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
-from sympy import symbols, sympify, lambdify
+from sympy import symbols, sympify, lambdify, solve
 import pandas as pd
 import io
 
@@ -37,7 +37,6 @@ with col3:
 
 with col4:
     ymax = st.number_input("y máximo", value=5.0)
-
 
 # ---------------------------------------------------
 # PAINEL DE ESTILO
@@ -111,6 +110,8 @@ if st.button("Gerar gráfico"):
 
     linhas = entrada.split("\n")
 
+    pontos_notaveis = []
+
     try:
 
         for linha in linhas:
@@ -121,19 +122,47 @@ if st.button("Gerar gráfico"):
                 f = lambdify(x, expr, "numpy")
                 ys = f(xs)
 
-                break
+            else:
 
-            expr_str, cond_str = linha.split(":")
+                expr_str, cond_str = linha.split(":")
 
-            expr = sympify(expr_str.strip())
+                expr = sympify(expr_str.strip())
 
-            f = lambdify(x, expr, "numpy")
+                f = lambdify(x, expr, "numpy")
 
-            condicao = converter_condicao(cond_str.strip())
+                condicao = converter_condicao(cond_str.strip())
 
-            mask = eval(condicao)
+                mask = eval(condicao)
 
-            ys[mask] = f(xs[mask])
+                ys[mask] = f(xs[mask])
+
+            # raízes
+            try:
+                zeros = solve(expr, x)
+
+                for z in zeros:
+                    if z.is_real:
+                        y_val = expr.subs(x, z)
+                        pontos_notaveis.append(("Raiz", float(z), float(y_val)))
+            except:
+                pass
+
+            # vértice (se for quadrática)
+            try:
+                poly = expr.as_poly()
+
+                if poly and poly.degree() == 2:
+
+                    a = poly.all_coeffs()[0]
+                    b = poly.all_coeffs()[1]
+
+                    xv = -b/(2*a)
+                    yv = expr.subs(x, xv)
+
+                    pontos_notaveis.append(("Vértice", float(xv), float(yv)))
+
+            except:
+                pass
 
         fig, ax = plt.subplots(figsize=(5,4))
 
@@ -196,8 +225,6 @@ if st.button("Gerar gráfico"):
         with colB:
             st.pyplot(fig)
 
-        # exportar PNG
-
         buffer = io.BytesIO()
 
         fig.savefig(buffer, format="png", dpi=300, bbox_inches="tight")
@@ -210,29 +237,19 @@ if st.button("Gerar gráfico"):
         )
 
         # ---------------------------------------------------
-        # TABELA DE VALORES DO GRÁFICO
+        # TABELA DE PONTOS NOTÁVEIS
         # ---------------------------------------------------
 
-        st.markdown("### Tabela de valores da função")
+        if pontos_notaveis:
 
-        xs_tabela = np.arange(xmin, xmax + 1, 1)
+            df = pd.DataFrame(
+                pontos_notaveis,
+                columns=["Tipo", "x", "f(x)"]
+            )
 
-        ys_tabela = []
+            st.markdown("### Pontos notáveis da função")
 
-        for valor in xs_tabela:
-
-            try:
-                y_val = np.interp(valor, xs, ys)
-                ys_tabela.append(round(y_val, 4))
-            except:
-                ys_tabela.append(None)
-
-        tabela = pd.DataFrame({
-            "x": xs_tabela,
-            "f(x)": ys_tabela
-        })
-
-        st.dataframe(tabela, use_container_width=True)
+            st.dataframe(df, use_container_width=True)
 
     except Exception as e:
 
