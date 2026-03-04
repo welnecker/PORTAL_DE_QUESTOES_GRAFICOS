@@ -141,17 +141,15 @@ if st.button("Gerar gráfico"):
         )
 
         # grade estilo livro
-        ax.minorticks_on()
-
         ax.grid(True, which='major', linestyle='-', linewidth=0.6, alpha=0.7)
-        ax.grid(True, which='minor', linestyle=':', linewidth=0.4, alpha=0.5)
-
         # setas nos eixos
         ax.plot((1), (0), ls="", marker=">", ms=6, color="black",
                 transform=ax.get_yaxis_transform(), clip_on=False)
 
         ax.plot((0), (1), ls="", marker="^", ms=6, color="black",
                 transform=ax.get_xaxis_transform(), clip_on=False)
+        ax.text(xmax, 0.2, "x", fontsize=9, ha="right")
+        ax.text(0.2, ymax, "y", fontsize=9, va="top")
 
         # centralizar gráfico
         colA, colB, colC = st.columns([1,2,1])
