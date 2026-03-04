@@ -84,23 +84,42 @@ if st.button("Gerar gráfico"):
 
             ys[mask] = f(xs[mask])
 
-        fig, ax = plt.subplots(figsize=(8,6))
+        fig, ax = plt.subplots(figsize=(5,4))
 
+        # gráfico da função
         ax.plot(xs, ys, color="blue", linewidth=2)
 
+        # eixos principais
         ax.axhline(0, color="black", linewidth=1.5)
         ax.axvline(0, color="black", linewidth=1.5)
 
+        # limites
         ax.set_xlim(xmin, xmax)
         ax.set_ylim(ymin, ymax)
 
-        ax.grid(True, linestyle="--", alpha=0.6)
+        # escala matemática correta
+        ax.set_aspect('equal', adjustable='box')
+
+        # marcações inteiras
+        ax.set_xticks(np.arange(xmin, xmax+1, 1))
+        ax.set_yticks(np.arange(ymin, ymax+1, 1))
+
+        # grade estilo livro didático
+        ax.minorticks_on()
+
+        ax.grid(True, which='major', linestyle='-', linewidth=0.6, alpha=0.7)
+        ax.grid(True, which='minor', linestyle=':', linewidth=0.4, alpha=0.5)
 
         ax.set_xlabel("x")
         ax.set_ylabel("y")
 
-        st.pyplot(fig)
+        # centralizar gráfico na tela
+        col1, col2, col3 = st.columns([1,2,1])
 
+        with col2:
+            st.pyplot(fig)
+
+        # exportação PNG
         buffer = io.BytesIO()
 
         fig.savefig(buffer, format="png", dpi=300, bbox_inches="tight")
