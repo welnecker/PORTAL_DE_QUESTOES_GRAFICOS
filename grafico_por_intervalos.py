@@ -86,30 +86,40 @@ if st.button("Gerar gráfico"):
 
         fig, ax = plt.subplots(figsize=(5,4))
 
-        # gráfico da função
+        # função
         ax.plot(xs, ys, color="blue", linewidth=2)
-
-        # eixos principais
-        ax.axhline(0, color="black", linewidth=1.5)
-        ax.axvline(0, color="black", linewidth=1.5)
-
+        
+        # mover eixos para a origem
+        ax.spines['left'].set_position('zero')
+        ax.spines['bottom'].set_position('zero')
+        
+        # esconder bordas superiores
+        ax.spines['right'].set_color('none')
+        ax.spines['top'].set_color('none')
+        
+        # deixar eixos mais espessos
+        ax.spines['left'].set_linewidth(1.5)
+        ax.spines['bottom'].set_linewidth(1.5)
+        
         # limites
         ax.set_xlim(xmin, xmax)
         ax.set_ylim(ymin, ymax)
-
-        # escala matemática correta
+        
+        # escala matemática
         ax.set_aspect('equal', adjustable='box')
-
+        
         # marcações inteiras
         ax.set_xticks(np.arange(xmin, xmax+1, 1))
         ax.set_yticks(np.arange(ymin, ymax+1, 1))
-
+        
+        # reduzir tamanho dos índices
+        ax.tick_params(axis='both', labelsize=8)
+        
         # grade estilo livro didático
         ax.minorticks_on()
-
+        
         ax.grid(True, which='major', linestyle='-', linewidth=0.6, alpha=0.7)
         ax.grid(True, which='minor', linestyle=':', linewidth=0.4, alpha=0.5)
-
         ax.set_xlabel("x")
         ax.set_ylabel("y")
 
