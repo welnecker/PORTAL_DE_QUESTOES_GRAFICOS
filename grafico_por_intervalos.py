@@ -2,6 +2,7 @@ import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 from sympy import symbols, sympify, lambdify
+import pandas as pd
 import io
 
 st.set_page_config(layout="wide")
@@ -136,7 +137,6 @@ if st.button("Gerar gráfico"):
 
         fig, ax = plt.subplots(figsize=(5,4))
 
-        # gráfico da função
         ax.plot(
             xs,
             ys,
@@ -145,28 +145,23 @@ if st.button("Gerar gráfico"):
             linestyle=mapa_estilo[estilo_linha]
         )
 
-        # limites
         ax.set_xlim(xmin, xmax)
         ax.set_ylim(ymin, ymax)
 
-        # escala matemática
         ax.set_aspect('equal', adjustable='box')
 
-        # mover eixos para origem
         ax.spines['left'].set_position('zero')
         ax.spines['bottom'].set_position('zero')
 
-        # esconder bordas superiores
         ax.spines['right'].set_color('none')
         ax.spines['top'].set_color('none')
 
-        # estilo dos eixos
         ax.spines['left'].set_linewidth(espessura_eixos)
         ax.spines['bottom'].set_linewidth(espessura_eixos)
+
         ax.spines['left'].set_color(cor_eixos)
         ax.spines['bottom'].set_color(cor_eixos)
 
-        # marcações inteiras
         xticks = np.arange(xmin, xmax+1, 1)
         yticks = np.arange(ymin, ymax+1, 1)
 
@@ -185,10 +180,8 @@ if st.button("Gerar gráfico"):
             pad=2
         )
 
-        # grade
         ax.grid(True, which='major', linestyle='-', linewidth=0.6, color=cor_grade, alpha=0.7)
 
-        # setas
         ax.plot((1), (0), ls="", marker=">", ms=6, color=cor_eixos,
                 transform=ax.get_yaxis_transform(), clip_on=False)
 
@@ -198,13 +191,13 @@ if st.button("Gerar gráfico"):
         ax.text(xmax, 0.2, "x", fontsize=9, ha="right")
         ax.text(0.2, ymax, "y", fontsize=9, va="top")
 
-        # centralizar
         colA, colB, colC = st.columns([1,2,1])
 
         with colB:
             st.pyplot(fig)
 
-        # exportar
+        # exportar PNG
+
         buffer = io.BytesIO()
 
         fig.savefig(buffer, format="png", dpi=300, bbox_inches="tight")
@@ -215,6 +208,31 @@ if st.button("Gerar gráfico"):
             file_name="grafico_funcao.png",
             mime="image/png"
         )
+
+        # ---------------------------------------------------
+        # TABELA DE VALORES DO GRÁFICO
+        # ---------------------------------------------------
+
+        st.markdown("### Tabela de valores da função")
+
+        xs_tabela = np.arange(xmin, xmax + 1, 1)
+
+        ys_tabela = []
+
+        for valor in xs_tabela:
+
+            try:
+                y_val = np.interp(valor, xs, ys)
+                ys_tabela.append(round(y_val, 4))
+            except:
+                ys_tabela.append(None)
+
+        tabela = pd.DataFrame({
+            "x": xs_tabela,
+            "f(x)": ys_tabela
+        })
+
+        st.dataframe(tabela, use_container_width=True)
 
     except Exception as e:
 
